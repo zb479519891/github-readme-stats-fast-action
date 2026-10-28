@@ -1,0 +1,41 @@
+name: Cleanup old Actions runs
+
+on:
+  schedule:
+    - cron: "0 8 */5 * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+
+concurrency:
+  group: cleanup-actions-runs
+  cancel-in-progress: true
+
+env:
+  KEEP_RECENT: 4
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Delete old Actions runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          gh api \
+            --paginate \
+            "repos/${{ github.repository }}/actions/runs?per_page=100" \
+            --jq '.workflow_runs[] | select(.status != "queued" and .status != "in_progress" and .status != "waiting" and .status != "requested" and .status != "pending") | [.id, .created_at, .status] | @tsv' \
+            | sort -k2 -r \
+            | tail -n +$((KEEP_RECENT + 1)) \
+            | while IFS=$'\t' read -r run_id created_at status; do
+                [ -z "$run_id" ] && continue
+                echo "Deleting workflow run $run_id ($created_at, status: $status)"
+                gh api -X DELETE \
+                  "repos/${{ github.repository }}/actions/runs/$run_id"
+              done
