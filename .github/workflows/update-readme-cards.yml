@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Generate stats card
         uses: Pranesh-2005/github-readme-stats-fast-action@v1.3
@@ -46,7 +46,6 @@ jobs:
           options: username=praneshjs
           path: profile/wakatime.svg
           token: ${{ secrets.GITHUB_TOKEN }}
-      
 
       - name: Commit cards
         run: |
