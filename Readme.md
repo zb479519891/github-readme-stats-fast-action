@@ -4,6 +4,8 @@ Generate [GitHub Readme Stats Fast](https://github.com/pranesh-2005/github-readm
 
 ## Quick start
 
+Add this workflow to your profile repository at `.github/workflows/readme-stats.yml`. Replace the example pin repository values if you want to display a different project.
+
 ```yaml
 name: Update README cards
 
@@ -22,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate stats card
-        uses: Pranesh-2005/github-readme-stats-fast-action@v1.3
+        uses: zb479519891/github-readme-stats-fast-action@main
         with:
           card: stats
           options: username=${{ github.repository_owner }}&show_icons=true
@@ -30,7 +32,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate top languages card
-        uses: Pranesh-2005/github-readme-stats-fast-action@v1.3
+        uses: zb479519891/github-readme-stats-fast-action@main
         with:
           card: top-langs
           options: username=${{ github.repository_owner }}&layout=compact&langs_count=6
@@ -38,7 +40,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate streak card
-        uses: Pranesh-2005/github-readme-stats-fast-action@v1.3
+        uses: zb479519891/github-readme-stats-fast-action@main
         with:
           card: streak
           options: username=${{ github.repository_owner }}&layout=compact
@@ -46,7 +48,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate pin card
-        uses: Pranesh-2005/github-readme-stats-fast-action@v1.3
+        uses: zb479519891/github-readme-stats-fast-action@main
         with:
           card: pin
           options: username=pranesh-2005&repo=github-readme-stats-fast
@@ -55,11 +57,11 @@ jobs:
 
       - name: Commit cards
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add profile/*.svg
           git commit -m "Update README cards" || echo "No changes to commit"
-          git push origin HEAD
+          git push
 ```
 
 Then embed from your profile README:
@@ -73,18 +75,20 @@ Then embed from your profile README:
 
 ## Deployment options
 
-This action is a recommended deployment option. You can also deploy on Vercel or other platforms. See the [GitHub Readme Stats Fast README](https://github.com/Pranesh-2005/github-readme-stats-fast#deploy-on-your-own).
+This action is one way to generate cards without hosting a separate web service. See the [GitHub Readme Stats Fast README](https://github.com/pranesh-2005/github-readme-stats-fast#deploy-on-your-own) for other deployment options.
 
 ## Inputs
 
 - `card` (required): Card type. Supported: `stats`, `top-langs`, `streak`, `pin`, `wakatime`, `gist`.
 - `options`: Card options as a query string (`key=value&...`) or JSON. If `username` is omitted, the action uses the repository owner.
-- `path`: Output path for the SVG file. Defaults to `profile/<card>.svg`.
-- `token`: GitHub token (PAT or `GITHUB_TOKEN`). For private repo stats, use a [PAT](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with `repo` and `read:user` scopes.
+- `path`: Output path. Defaults to `profile/<card>.svg`.
+- `token`: GitHub token (PAT or `GITHUB_TOKEN`). For private repository stats, use a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with the required `repo` and `read:user` scopes.
+
+The action exposes the generated SVG path as the `path` output.
 
 ## Examples
 
-Stats example:
+Stats card:
 
 ```yaml
 with:
@@ -93,7 +97,7 @@ with:
   token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Top languages example:
+Top languages card:
 
 ```yaml
 with:
@@ -102,7 +106,7 @@ with:
   token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Streak example:
+Streak card:
 
 ```yaml
 with:
@@ -111,7 +115,7 @@ with:
   token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-WakaTime example:
+WakaTime card:
 
 ```yaml
 with:
@@ -120,7 +124,7 @@ with:
   token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Gist example:
+Gist card:
 
 ```yaml
 with:
@@ -129,7 +133,7 @@ with:
   token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-JSON options example:
+JSON options:
 
 ```yaml
 with:
@@ -140,4 +144,4 @@ with:
 
 ## Notes
 
-- This action uses the same renderers and fetchers as [Pranesh-2005/github-readme-stats-fast](https://github.com/pranesh-2005/github-readme-stats-fast).
+This action uses the same renderers and fetchers as [Pranesh-2005/github-readme-stats-fast](https://github.com/pranesh-2005/github-readme-stats-fast).
