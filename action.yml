@@ -25,30 +25,28 @@ inputs:
 outputs:
   path:
     description: Path of generated SVG
+    value: ${{ steps.generate.outputs.path }}
 
 runs:
   using: composite
   steps:
-    # ✅ Install Node
     - name: Setup Node
       uses: actions/setup-node@v4
       with:
         node-version: 22
 
-    # ✅ Install pnpm
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
       with:
         version: 9
 
-    # ✅ Install deps via pnpm
     - name: Install dependencies
       run: pnpm install --prod --frozen-lockfile --ignore-scripts
       shell: bash
       working-directory: ${{ github.action_path }}
 
-    # ✅ Run generator
     - name: Generate card
+      id: generate
       run: node ${{ github.action_path }}/index.js
       shell: bash
       env:
