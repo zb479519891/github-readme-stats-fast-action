@@ -1,10 +1,20 @@
 # GitHub Readme Stats Fast Action
 
-Generate [GitHub Readme Stats Fast](https://github.com/pranesh-2005/github-readme-stats-fast) cards in your GitHub Actions workflow, commit them to your profile repository, and embed them directly from there.
+Generate SVG cards from [GitHub Readme Stats Fast](https://github.com/pranesh-2005/github-readme-stats-fast) with GitHub Actions, commit the files to your repository, and display them in your README—without running your own server.
+
+## Features
+
+- Generate `stats`, `top-langs`, `streak`, `pin`, `wakatime`, and `gist` cards.
+- Configure cards with a query string or JSON options.
+- Save generated SVGs to a path you choose.
+- Use the generated files directly in a GitHub README.
+- Run on a schedule or manually with `workflow_dispatch`.
 
 ## Quick start
 
-Add this workflow to your profile repository at `.github/workflows/readme-stats.yml`. Replace the example pin repository values if you want to display a different project.
+The following example is intended for your **profile repository** (the repository named after your GitHub username). It generates three cards and commits the SVG files to that repository.
+
+Create `.github/workflows/readme-stats.yml`:
 
 ```yaml
 name: Update README cards
@@ -21,7 +31,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out repository
+        uses: actions/checkout@v5
 
       - name: Generate stats card
         uses: zb479519891/github-readme-stats-fast-action@main
@@ -47,101 +58,149 @@ jobs:
           path: profile/streak.svg
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate pin card
-        uses: zb479519891/github-readme-stats-fast-action@main
-        with:
-          card: pin
-          options: username=pranesh-2005&repo=github-readme-stats-fast
-          path: profile/pin-github-readme-stats-fast.svg
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit cards
+      - name: Commit generated cards
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add profile/*.svg
-          git commit -m "Update README cards" || echo "No changes to commit"
+          git diff --cached --quiet && exit 0
+          git commit -m "Update README cards"
           git push
 ```
 
-Then embed from your profile README:
+> **Note:** `permissions: contents: write` is needed for the workflow to commit generated files. If your repository's settings restrict GitHub Actions from writing to the repository, enable read and write permissions in the repository's Actions settings.
+
+## Display the cards
+
+Add these lines to your profile repository's `README.md`. The leading `!` is required to render each SVG as an image rather than a text link.
 
 ```md
-![Stats](./profile/stats.svg)
-![Top Languages](./profile/top-langs.svg)
-![Streak](./profile/streak.svg)
-![Pinned](./profile/pin-github-readme-stats-fast.svg)
+![GitHub stats](./profile/stats.svg)
+![Top languages](./profile/top-langs.svg)
+![GitHub streak](./profile/streak.svg)
 ```
 
-## Deployment options
+To make an image clickable, wrap it in a link:
 
-This action is one way to generate cards without hosting a separate web service. See the [GitHub Readme Stats Fast README](https://github.com/pranesh-2005/github-readme-stats-fast#deploy-on-your-own) for other deployment options.
+```md
+[![Top languages](./profile/top-langs.svg)](./profile/top-langs.svg)
+```
 
 ## Inputs
 
-- `card` (required): Card type. Supported: `stats`, `top-langs`, `streak`, `pin`, `wakatime`, `gist`.
-- `options`: Card options as a query string (`key=value&...`) or JSON. If `username` is omitted, the action uses the repository owner.
-- `path`: Output path. Defaults to `profile/<card>.svg`.
-- `token`: GitHub token (PAT or `GITHUB_TOKEN`). For private repository stats, use a [personal access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with the required `repo` and `read:user` scopes.
+| Input | Required | Description |
+| --- | --- | --- |
+| `card` | Yes | Card type: `stats`, `top-langs`, `streak`, `pin`, `wakatime`, or `gist`. |
+| `options` | No | Card options as a URL query string (`key=value&...`) or a JSON object. Defaults to an empty string. |
+| `path` | No | Destination path for the SVG. Defaults to `profile/<card>.svg`. |
+| `token` | No | GitHub token passed to the card renderer. Defaults to an empty string. |
 
-The action exposes the generated SVG path as the `path` output.
+The action exposes a `path` output containing the output path of the generated SVG.
 
 ## Examples
 
-Stats card:
+### Stats
 
 ```yaml
-with:
-  card: stats
-  options: username=octocat&show_icons=true&hide_rank=true&bg_color=0D1117
-  token: ${{ secrets.GITHUB_TOKEN }}
+- name: Generate stats
+  uses: zb479519891/github-readme-stats-fast-action@main
+  with:
+    card: stats
+    options: username=octocat&show_icons=true&hide_rank=true&bg_color=0D1117
+    path: profile/stats.svg
+    token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Top languages card:
+### Top languages
 
 ```yaml
-with:
-  card: top-langs
-  options: username=octocat&layout=compact&langs_count=6
-  token: ${{ secrets.GITHUB_TOKEN }}
+- name: Generate top languages
+  uses: zb479519891/github-readme-stats-fast-action@main
+  with:
+    card: top-langs
+    options: username=octocat&layout=compact&langs_count=6
+    path: profile/top-langs.svg
+    token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Streak card:
+### Streak
 
 ```yaml
-with:
-  card: streak
-  options: username=octocat&layout=compact
-  token: ${{ secrets.GITHUB_TOKEN }}
+- name: Generate streak
+  uses: zb479519891/github-readme-stats-fast-action@main
+  with:
+    card: streak
+    options: username=octocat&layout=compact
+    path: profile/streak.svg
+    token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-WakaTime card:
+### Pinned repository
 
 ```yaml
-with:
-  card: wakatime
-  options: username=octocat&layout=compact
-  token: ${{ secrets.GITHUB_TOKEN }}
+- name: Generate pinned repository card
+  uses: zb479519891/github-readme-stats-fast-action@main
+  with:
+    card: pin
+    options: username=octocat&repo=Hello-World
+    path: profile/pin-hello-world.svg
+    token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-Gist card:
+### WakaTime
 
 ```yaml
-with:
-  card: gist
-  options: id=0123456789abcdef
-  token: ${{ secrets.GITHUB_TOKEN }}
+- name: Generate WakaTime card
+  uses: zb479519891/github-readme-stats-fast-action@main
+  with:
+    card: wakatime
+    options: username=octocat&layout=compact
+    path: profile/wakatime.svg
+    token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-JSON options:
+### Gist
 
 ```yaml
-with:
-  card: stats
-  options: '{"username":"octocat","show_icons":true,"hide_rank":true}'
-  token: ${{ secrets.GITHUB_TOKEN }}
+- name: Generate gist card
+  uses: zb479519891/github-readme-stats-fast-action@main
+  with:
+    card: gist
+    options: id=0123456789abcdef
+    path: profile/gist.svg
+    token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-## Notes
+### JSON options
 
-This action uses the same renderers and fetchers as [Pranesh-2005/github-readme-stats-fast](https://github.com/pranesh-2005/github-readme-stats-fast).
+If you prefer JSON, wrap the JSON object in single quotes:
+
+```yaml
+- name: Generate stats with JSON options
+  uses: zb479519891/github-readme-stats-fast-action@main
+  with:
+    card: stats
+    options: '{"username":"octocat","show_icons":true,"hide_rank":true}'
+    path: profile/stats.svg
+    token: ${{ secrets.GITHUB_TOKEN }}
+```
+
+## Token and permissions
+
+- For public repository cards, start with `${{ secrets.GITHUB_TOKEN }}`.
+- Some cards or private-data use cases may need a personal access token (PAT) with appropriate access. Store it as a repository secret and pass that secret through `token`; do not hard-code tokens in the workflow or README.
+- The workflow needs `contents: write` only if it commits generated SVG files back to the repository.
+- If a workflow fails, open the **Actions** tab in your repository and inspect the failed step's log.
+
+## How it works
+
+1. GitHub Actions checks out your repository.
+2. This action runs the selected card renderer and writes the SVG to `path`.
+3. Your workflow commits the generated SVG files.
+4. Your README embeds those committed files as images.
+
+This action uses the renderers and fetchers from [Pranesh-2005/github-readme-stats-fast](https://github.com/pranesh-2005/github-readme-stats-fast). For more deployment options, see that project's [deployment documentation](https://github.com/pranesh-2005/github-readme-stats-fast#deploy-on-your-own).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
