@@ -1,6 +1,6 @@
 # GitHub Readme Stats Fast Action
 
-**English | [简体中文](#简体中文)**
+**English | [简体中文](README.zh-CN.md)**
 
 Generate SVG cards from [GitHub Readme Stats Fast](https://github.com/pranesh-2005/github-readme-stats-fast) with GitHub Actions, commit the files to your repository, and display them in your README—without running your own server.
 
